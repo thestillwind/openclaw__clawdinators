@@ -8,8 +8,6 @@ if [ -e "${out_dir}" ]; then
   rm -rf "${out_dir}"
 fi
 
-mkdir -p "${out_dir}"
-
 nix run github:nix-community/nixos-generators -- -f raw-efi -c "${config_path}" -o "${out_dir}"
 
 if [ ! -f "${out_dir}/nixos.img" ]; then
