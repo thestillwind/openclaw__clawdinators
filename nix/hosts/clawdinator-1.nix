@@ -15,7 +15,7 @@
   boot.loader.grub.device = lib.mkForce "/dev/nvme0n1";
 
   users.users.root.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOLItFT3SVm5r7gELrfRRJxh6V2sf/BIx7HKXt6oVWpB joshpalmer123@gmail.com"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOLItFT3SVm5r7gELrfRRJxh6V2sf/BIx7HKXt6oVWpB"
   ];
 
   networking.firewall.allowedTCPPorts = [ 22 18789 ];
