@@ -41,10 +41,11 @@ Deploy flow (automation-first):
 - Build a bootstrap NixOS image with nixos-generators (raw) and upload it to S3.
   - Use `nix/hosts/clawdinator-1-image.nix` for image builds.
 - CI is preferred: `.github/workflows/image-build.yml` runs build → S3 upload → AMI import.
+- CI must provide `CLAWDINATOR_AGE_KEY` (private key) so the image can bake `/etc/agenix/keys/clawdinator.agekey`.
 - Bootstrap S3 bucket + scoped IAM user + VM Import role with `infra/opentofu/aws` (use homelab-admin creds).
 - Bootstrap AWS instances from the AMI with `infra/opentofu/aws` (set `TF_VAR_ami_id`).
 - Import the image into AWS as an AMI (snapshot import + register image).
-- Grab the host SSH key and add it to `../nix/nix-secrets/secrets.nix`; rekey secrets with agenix.
+- Ensure secrets are encrypted to the baked agenix key (see `../nix/nix-secrets/secrets.nix`).
 - Ensure required secrets exist: `clawdinator-github-app.pem`, `clawdinator-discord-token`, `clawdinator-anthropic-api-key`.
 - Update `nix/hosts/<host>.nix` (Discord allowlist, GitHub App installationId, identity name).
 - Ensure `/var/lib/clawd/repo` contains this repo (self-update requires it).

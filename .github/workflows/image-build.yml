@@ -26,6 +26,14 @@ jobs:
             nixpkgs#nixos-generators \
             nixpkgs#awscli2
 
+      - name: Write agenix image key
+        env:
+          CLAWDINATOR_AGE_KEY: ${{ secrets.CLAWDINATOR_AGE_KEY }}
+        run: |
+          mkdir -p nix/keys
+          printf '%s' "${CLAWDINATOR_AGE_KEY}" > nix/keys/clawdinator.agekey
+          chmod 600 nix/keys/clawdinator.agekey
+
       - name: Build image
         run: scripts/build-image.sh
 

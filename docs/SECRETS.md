@@ -8,6 +8,7 @@ Infrastructure (OpenTofu):
 
 Image pipeline (CI):
 - `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION` / `S3_BUCKET` (required).
+- `CLAWDINATOR_AGE_KEY` (required; private age key baked into the AMI).
 
 Local storage:
 - Keep AWS keys encrypted in `../nix/nix-secrets` for local runs if needed.
@@ -32,6 +33,7 @@ Agenix (local secrets repo):
 - Store encrypted files in `../nix/nix-secrets` (relative to this repo).
 - Sync encrypted secrets to the host at `/var/lib/clawd/nix-secrets`.
 - Decrypt on host with agenix; point NixOS options at `/run/agenix/*`.
+- Image builds bake the agenix identity to `/etc/agenix/keys/clawdinator.agekey`; do not commit this key.
 - Required files (minimum): `clawdinator-github-app.pem.age`, `clawdinator-discord-token.age`, `clawdinator-anthropic-api-key.age`.
 - CI image pipeline (stored locally, not on hosts): `clawdinator-image-uploader-access-key-id.age`, `clawdinator-image-uploader-secret-access-key.age`, `clawdinator-image-bucket-name.age`, `clawdinator-image-bucket-region.age`.
 

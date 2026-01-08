@@ -20,7 +20,7 @@
 
   networking.firewall.allowedTCPPorts = [ 22 18789 ];
 
-  age.identityPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
+  age.identityPaths = [ "/etc/agenix/keys/clawdinator.agekey" ];
   age.secrets."clawdinator-github-app.pem" = {
     file = "/var/lib/clawd/nix-secrets/clawdinator-github-app.pem.age";
     owner = "clawdinator";

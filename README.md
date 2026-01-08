@@ -35,6 +35,7 @@ Secrets (required):
 - Discord bot token (per instance).
 - Anthropic API key (Claude models).
 - AWS credentials (image pipeline + infra).
+- Agenix image key (baked into AMI via CI).
 
 Secrets are stored in `../nix/nix-secrets` using agenix and decrypted to `/run/agenix/*`
 on hosts. See `docs/SECRETS.md`.
@@ -51,12 +52,13 @@ Image-based deploy (only path):
 2) Upload the raw image to S3 (private object).
 3) Import into AWS as an AMI (snapshot import + register image).
 4) Launch hosts from the AMI (OpenTofu `infra/opentofu/aws`).
-5) Re-key agenix secrets to the new host SSH key and sync secrets to `/var/lib/clawd/nix-secrets`.
+5) Ensure secrets are encrypted to the baked agenix key and sync them to `/var/lib/clawd/nix-secrets`.
 6) Run `nixos-rebuild switch --flake /var/lib/clawd/repo#clawdinator-1`.
 
 CI (recommended):
 - GitHub Actions builds the image, uploads to S3, and imports an AMI.
 - See `.github/workflows/image-build.yml` and `scripts/*.sh`.
+- CI must provide `CLAWDINATOR_AGE_KEY` so the image can bake `/etc/agenix/keys/clawdinator.agekey`.
 
 AWS bucket bootstrap:
 - `infra/opentofu/aws` provisions a private S3 bucket + scoped IAM user + VM Import role.
