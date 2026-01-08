@@ -3,14 +3,24 @@
 CLAWDINATORS are maintainer‑grade coding agents. This repo defines how to spawn them
 declaratively (OpenTofu + NixOS). Humans are not in the loop.
 
-Principles:
-- Declarative‑first. A CLAWDINATOR can bootstrap another CLAWDINATOR with a single command.
+Prime directives:
+- Declarative‑first. Another CLAWDINATOR can bootstrap a fresh CLAWDINATOR with a single command.
 - No manual host edits. The repo + agenix secrets are the source of truth.
-- Latest upstream nix‑clawdbot by default; breaking changes are acceptable.
+- Latest upstream `nix-clawdbot` by default; breaking changes are acceptable.
+- AWS only: AMI pipeline is the only deploy path (no pets, no in‑place drift).
+- CLAWDINATORS are ephemeral, but share memory (hive mind).
+- CLAWDINATORS are br00tal. Soul lives in `CLAWDINATOR-SOUL.md`.
+- CLAWDINATORS respond only to maintainers.
+- Primary task: monitor GitHub issues + PRs and direct human attention.
+- CLAWDINATORS can write and run code for maintainers (Codex for coding, Claude for personality).
+- Discord setup must follow upstream docs: https://github.com/clawdbot/clawdbot/blob/main/docs/discord.md
 
-Stack:
-- AWS AMIs built in CI (nixos-generators raw + import-image).
-- AWS EC2 instances launched from those AMIs via OpenTofu.
+Zen of Clawdbot (explicit):
+- **Only one way to do things.** No optional paths.
+
+Stack (AWS):
+- AMIs built in CI (nixos-generators raw + import-image).
+- EC2 instances launched from those AMIs via OpenTofu.
 - NixOS modules configure Clawdbot and CLAWDINATOR runtime.
 - Shared hive‑mind memory stored on a mounted host volume.
 
@@ -41,12 +51,12 @@ Secrets are stored in `../nix/nix-secrets` using agenix and decrypted to `/run/a
 on hosts. See `docs/SECRETS.md`.
 
 Deploy (automation‑first):
-- Prefer image-based provisioning for speed and repeatability.
+- Image‑based provisioning only.
 - Host config lives in `nix/hosts/*` and is exposed in `flake.nix`.
 - Ensure `/var/lib/clawd/repo` contains this repo (needed for self‑update).
 - Configure Discord guild/channel allowlist and GitHub App installation ID.
 
-Image-based deploy (only path):
+Image‑based deploy (only path):
 1) Build a bootstrap image with nixos-generators:
    - `nix run github:nix-community/nixos-generators -- -f raw -c nix/hosts/clawdinator-1-image.nix -o dist`
 2) Upload the raw image to S3 (private object).
