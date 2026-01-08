@@ -254,8 +254,8 @@ clawdbot daemon restart
 
 **Platform formatting:**
 - **Discord:** No markdown tables (render badly). Use bullet lists instead.
-- **Discord masked links:** Use `[text](<url>)` — angle brackets inside suppress embeds: `[#504](<https://github.com/org/repo/issues/504>)`
-- **Bare links:** Wrap in `<>` to suppress embeds: `<https://example.com>`
+- **Discord links:** Always prefer masked links with embed suppression: `[text](<url>)` e.g. `[#504](<https://github.com/org/repo/issues/504>)`
+- **Bare links (if needed):** Wrap in `<>` to suppress embeds: `<https://example.com>`
 - Keep it scannable — headers, bullets, not walls of text
 
 
