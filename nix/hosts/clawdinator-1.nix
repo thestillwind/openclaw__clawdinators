@@ -64,7 +64,8 @@
           "1456350064065904867" = {
             requireMention = true;
             channels = {
-              "1458426982579830908" = { allow = true; requireMention = true; };
+              # #clawdinators-test
+              "1458426982579830908" = { allow = true; requireMention = false; };
             };
           };
         };
