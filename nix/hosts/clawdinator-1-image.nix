@@ -26,6 +26,10 @@
       assertion = (builtins.getEnv "CLAWDINATOR_AGE_KEY") != "";
       message = "CLAWDINATOR_AGE_KEY must be set when building the image.";
     }
+    {
+      assertion = (builtins.getEnv "CLAWDINATOR_SECRETS_DIR") != "";
+      message = "CLAWDINATOR_SECRETS_DIR must point at encrypted age secrets.";
+    }
   ];
 
   environment.etc."agenix/keys/clawdinator.agekey" = {
@@ -37,7 +41,7 @@
   ];
 
   clawdinator.secretsPath = toString (builtins.path {
-    path = ../age-secrets;
+    path = builtins.toPath (builtins.getEnv "CLAWDINATOR_SECRETS_DIR");
     name = "clawdinator-age-secrets";
   });
 }
