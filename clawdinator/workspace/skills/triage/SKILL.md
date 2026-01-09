@@ -29,9 +29,11 @@ Read these files to understand current state:
    - `/memory/project.md` — project goals and priorities
    - `/memory/architecture.md` — architecture decisions
 
-4. **Discord signals**:
-   - Recent messages in conversation context from lurk channels
+4. **Discord signals** (persisted by lurk skill):
+   - `/memory/discord/YYYY-MM-DD.md` — today's channel activity
+   - `/memory/discord/YYYY-MM-DD.md` — yesterday's (for context)
    - Cross-reference with GitHub issues where relevant
+   - Multiple Discord reports of same issue = elevated priority
 
 ## Your Task
 
