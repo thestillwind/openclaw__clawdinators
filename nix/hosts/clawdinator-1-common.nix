@@ -65,6 +65,16 @@ in
         agent.workspace = "/var/lib/clawd/workspace";
         agent.maxConcurrent = 4;
         agent.skipBootstrap = true;
+        agents.defaults = {
+          models = {
+            "openai/gpt-5.2-codex" = { alias = "Codex"; };
+            "anthropic/claude-opus-4-5" = { alias = "Opus"; };
+          };
+          model = {
+            primary = "openai/gpt-5.2-codex";
+            fallbacks = [ "anthropic/claude-opus-4-5" ];
+          };
+        };
         logging = {
           level = "info";
           file = "/var/lib/clawd/logs/clawdbot.log";
