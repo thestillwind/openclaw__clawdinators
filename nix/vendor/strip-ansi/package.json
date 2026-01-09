@@ -1,0 +1,7 @@
+{
+  "name": "strip-ansi",
+  "version": "0.0.0-clawdinator",
+  "type": "module",
+  "main": "./index.js",
+  "exports": "./index.js"
+}
