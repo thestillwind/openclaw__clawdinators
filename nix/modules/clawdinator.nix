@@ -654,9 +654,12 @@ in
       wantedBy = [ "multi-user.target" ];
       after = [ "clawdinator-bootstrap.service" ];
       wants = [ "clawdinator-bootstrap.service" ];
+      unitConfig = {
+        ConditionPathExists = "!/run/agenix";
+      };
       serviceConfig = {
         Type = "oneshot";
-        ConditionPathExists = "!/run/agenix";
+        RemainAfterExit = true;
         ExecStart = "/run/current-system/bin/switch-to-configuration switch";
       };
     };
