@@ -71,7 +71,7 @@ Deploy flow (automation-first):
 - Ensure secrets are encrypted to the baked agenix key (see `../nix/nix-secrets/secrets.nix`).
 - Ensure required secrets exist: `moltinator-github-app.pem`, `moltinator-discord-token`, `moltinator-anthropic-api-key`.
 - Update `nix/hosts/<host>.nix` (Discord allowlist, GitHub App installationId, identity name).
-- Discord must use `messages.queue.byProvider.discord = "interrupt"`; `queue` delays replies to heartbeat and makes the bot appear dead.
+- Discord must use `messages.queue.byChannel.discord = "interrupt"`; `queue` delays replies to heartbeat and makes the bot appear dead.
 - Ensure `/var/lib/clawd/repos/moltinators` contains this repo (self-update requires it).
 - Verify systemd services: `clawdinator`, `clawdinator-github-app-token`, `clawdinator-self-update`.
 - Commit and push changes; repo is the source of truth.

@@ -113,7 +113,7 @@ in
         };
         messages.queue = {
           mode = "interrupt";
-          byProvider = {
+          byChannel = {
             discord = "interrupt";
             telegram = "interrupt";
             whatsapp = "interrupt";
@@ -137,7 +137,6 @@ in
                   "1458426982579830908" = {
                     allow = true;
                     requireMention = false;
-                    autoReply = true;
                   };
                   # #clawdributors-test (lurk only; replies denied via sendPolicy)
                   "1458138963067011176" = {

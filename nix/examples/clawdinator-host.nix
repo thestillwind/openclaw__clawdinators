@@ -27,7 +27,7 @@
     config = {
       gateway.mode = "server";
       agents.defaults.workspace = "/var/lib/clawd/workspace";
-      messages.queue.byProvider = {
+      messages.queue.byChannel = {
         discord = "queue";
         telegram = "interrupt";
         whatsapp = "interrupt";
