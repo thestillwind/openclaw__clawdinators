@@ -94,6 +94,29 @@ Bootstrap (local):
   - Then `gh secret set` for `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET`.
 - Get the latest AMI ID:
   - `aws ec2 describe-images --region eu-central-1 --owners self --filters "Name=tag:clawdinator,Values=true" --query "Images | sort_by(@,&CreationDate)[-1].[ImageId,Name,CreationDate]" --output text`
+
+End-to-end SDLC (local → AMI → host) **(verified)**:
+1) Decrypt AWS creds (homelab admin) and export:
+   - `cd ~/code/nix/nix-secrets`
+   - `RULES=./secrets.nix agenix -d homelab-admin.age -i ~/.ssh/id_ed25519 > /tmp/homelab-admin.env`
+   - `set -a; source /tmp/homelab-admin.env; set +a`
+   - Cleanup: `trash /tmp/homelab-admin.env`
+2) Push to `main` to trigger AMI build (`.github/workflows/image-build.yml`).
+3) Watch CI:
+   - `gh run list -R openclaw/clawdinators --limit 5`
+   - `gh run view <run_id> --log | grep AMI_ID`
+4) Redeploy from the new AMI (instance replacement):
+   - `devenv shell -- bash -lc "cd infra/opentofu/aws && TF_VAR_ami_id=<AMI_ID> TF_VAR_ssh_public_key=\"$(cat ~/.ssh/id_ed25519.pub)\" TF_VAR_aws_region=eu-central-1 tofu apply -auto-approve"`
+5) New IP:
+   - `jq -r '.outputs.instance_public_ip.value' infra/opentofu/aws/terraform.tfstate`
+   - `ssh -o StrictHostKeyChecking=accept-new root@<ip>`
+6) Post-deploy sanity:
+   - `systemctl is-active clawdinator`
+   - `systemctl is-active clawdinator-github-app-token.timer`
+   - `GH_CONFIG_DIR=/var/lib/clawd/gh gh auth status -h github.com`
+
+Important:
+- Repo/workspace on host is seeded from the **AMI snapshot**. `git pull` is ephemeral; rebuild AMI for persistent changes.
 - If SSH access is lost, use SSM (instance profile is attached via OpenTofu) to re-add `/root/.ssh/authorized_keys`.
 
 Key principle: mental notes don’t survive restarts — write it to a file.
