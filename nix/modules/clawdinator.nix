@@ -472,6 +472,16 @@ in
       shell = pkgs.bashInteractive;
     };
 
+    programs.git = {
+      enable = true;
+      config = {
+        user = {
+          name = "CLAWDINATOR Bot";
+          email = "clawdinator[bot]@users.noreply.github.com";
+        };
+      };
+    };
+
     environment.systemPackages =
       [ cfg.package ]
       ++ toolchain.packages

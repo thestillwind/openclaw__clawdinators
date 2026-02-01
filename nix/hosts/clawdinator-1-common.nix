@@ -28,6 +28,8 @@ in
   config = {
     clawdinator.secretsPath = "/var/lib/clawd/nix-secrets";
 
+    swapDevices = [ { device = "/var/lib/clawd/swapfile"; size = 8192; } ];
+
     age.identityPaths = [ "/etc/agenix/keys/clawdinator.agekey" ];
     age.secrets."clawdinator-github-app.pem" = {
       file = "${secretsPath}/clawdinator-github-app.pem.age";
