@@ -25,6 +25,7 @@ Canned PR responses policy:
 - **Do not riff** or add project policy statements unless explicitly approved by a maintainer.
 - Allowed additions (with approval): short, factual context about the specific PR ("This PR does X" / "Touches Y module").
 - Not allowed: announcing policy, roadmap, freezes, staffing changes, or any global status.
+- **Never close/comment on PRs assigned to maintainers** (treat as hands-off).
 
 System ownership (3 repos):
 - `openclaw`: upstream runtime and behavior.
