@@ -25,43 +25,43 @@ Goal: PR must end in GitHub state = MERGED (never CLOSED). Use `gh pr merge` wit
    - `git checkout -b temp/landpr-<ts-or-pr>`
 5) Check out PR branch locally:
    - `gh pr checkout <PR>`
-6) Rebase PR branch onto temp base:
+6) **Single approval gate:** summarize plan + merge strategy, then get explicit approval before any rebase/force-push/merge.
+7) Rebase PR branch onto temp base:
    - `git rebase temp/landpr-<ts-or-pr>`
    - Fix conflicts; keep history tidy.
-7) Fix + tests + changelog:
+8) Fix + tests + changelog:
    - Implement fixes + add/adjust tests
    - Update `CHANGELOG.md` and mention `#<PR>` + `@$contrib`
-8) Decide merge strategy:
-   - Rebase if we want to preserve commit history
-   - Squash if we want a single clean commit
-   - If unclear, ask
-9) Full gate (BEFORE commit):
+9) Decide merge strategy:
+   - Default: **rebase** (preserve history)
+   - Use **squash** only if explicitly requested
+10) Full gate (BEFORE commit):
    - `pnpm lint && pnpm build && pnpm test`
-10) Commit via committer (include # + contributor in commit message):
+11) Commit via committer (include # + contributor in commit message):
    - `committer "fix: <summary> (#<PR>) (thanks @$contrib)" CHANGELOG.md <changed files>`
    - `land_sha=$(git rev-parse HEAD)`
-11) Push updated PR branch (rebase => usually needs force):
+12) Push updated PR branch (rebase => usually needs force):
 
    ```sh
    git remote add prhead "$head_repo_url.git" 2>/dev/null || git remote set-url prhead "$head_repo_url.git"
    git push --force-with-lease prhead HEAD:$head
    ```
 
-12) Merge PR (must show MERGED on GitHub):
+13) Merge PR (must show MERGED on GitHub):
    - Rebase: `gh pr merge <PR> --rebase`
    - Squash: `gh pr merge <PR> --squash`
    - Never `gh pr close` (closing is wrong)
-13) Sync main:
+14) Sync main:
    - `git checkout main`
    - `git pull --ff-only`
-14) Comment on PR with what we did + SHAs + thanks **only with explicit user approval**:
+15) Comment on PR with what we did + SHAs + thanks **only with explicit user approval**:
 
    ```sh
    merge_sha=$(gh pr view <PR> --json mergeCommit --jq '.mergeCommit.oid')
    gh pr comment <PR> --body "Landed via temp rebase onto main.\n\n- Gate: pnpm lint && pnpm build && pnpm test\n- Land commit: $land_sha\n- Merge commit: $merge_sha\n\nThanks @$contrib!"
    ```
 
-15) Verify PR state == MERGED:
+16) Verify PR state == MERGED:
    - `gh pr view <PR> --json state --jq .state`
-16) Delete temp branch:
+17) Delete temp branch:
    - `git branch -D temp/landpr-<ts-or-pr>`

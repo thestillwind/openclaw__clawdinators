@@ -11,17 +11,17 @@ Use this skill to land **openclaw/openclaw** PRs only.
 ## Safety + Scope
 
 - **Repo restriction:** only `openclaw/openclaw`. If the PR is in any other repo, stop and ask.
-- **Confirmation required:** before rebase/force-push/merge, summarize the plan and ask for explicit approval.
+- **Single approval gate:** do all read‑only prep, then summarize the plan and ask for explicit approval **once** before any rebase/force‑push/merge.
 - **Never close PRs.** PR must end in GitHub state **MERGED**.
 - **No GitHub comments** unless the user explicitly approves (global policy).
 
 ## Instructions
 
-Follow the checklist here:
+Use this as a **playbook** — do **not** paste the full checklist into chat:
 - `/var/lib/clawd/repos/clawdinators/scripts/landpr.md`
 
 If the user did not specify a PR, use the most recent PR mentioned in the conversation. If ambiguous, ask.
 
-When ready to execute the merge step, confirm which strategy to use (rebase vs squash). If unclear, ask.
+Default merge strategy: **rebase** unless the user explicitly requests squash.
 
 After completion, verify PR state == MERGED.
