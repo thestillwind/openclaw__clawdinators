@@ -23,12 +23,16 @@ let
   githubTokenScript = pkgs.writeShellScript "clawdinator-github-app-token" ''
     set -euo pipefail
 
+    export PATH="${lib.makeBinPath [ pkgs.openssl pkgs.curl pkgs.jq pkgs.gh pkgs.coreutils ]}:$PATH"
+
     token_env="${cfg.githubApp.tokenEnvFile}"
     token_dir="$(dirname "$token_env")"
 
     mkdir -p "$token_dir"
-    chown root:${cfg.group} "$token_dir"
     chmod 0750 "$token_dir"
+    if [ "$(id -u)" -eq 0 ]; then
+      chown ${cfg.user}:${cfg.group} "$token_dir"
+    fi
 
     now="$(date +%s)"
     iat="$((now - 60))"
@@ -61,16 +65,21 @@ let
 
     umask 027
     printf 'GITHUB_APP_TOKEN=%s\nGITHUB_TOKEN=%s\nGH_TOKEN=%s\n' "$token" "$token" "$token" > "$token_env"
-    chown root:${cfg.group} "$token_env"
+    if [ "$(id -u)" -eq 0 ]; then
+      chown ${cfg.user}:${cfg.group} "$token_env"
+    fi
     chmod 0640 "$token_env"
 
     gh_config_dir="${ghConfigDir}"
     mkdir -p "$gh_config_dir"
-    chown ${cfg.user}:${cfg.group} "$gh_config_dir"
     chmod 0750 "$gh_config_dir"
+    if [ "$(id -u)" -eq 0 ]; then
+      chown ${cfg.user}:${cfg.group} "$gh_config_dir"
+    fi
     printf '%s' "$token" | GH_CONFIG_DIR="$gh_config_dir" gh auth login --hostname github.com --with-token
-    chown -R ${cfg.user}:${cfg.group} "$gh_config_dir"
-    chmod 0750 "$gh_config_dir"
+    if [ "$(id -u)" -eq 0 ]; then
+      chown -R ${cfg.user}:${cfg.group} "$gh_config_dir"
+    fi
     chmod 0640 "$gh_config_dir/hosts.yml"
     if [ -f "$gh_config_dir/config.yml" ]; then
       chmod 0640 "$gh_config_dir/config.yml"
@@ -470,6 +479,7 @@ in
         (pkgs.writeShellScriptBin "memory-read" ''exec /etc/clawdinator/bin/memory-read "$@"'')
         (pkgs.writeShellScriptBin "memory-write" ''exec /etc/clawdinator/bin/memory-write "$@"'')
         (pkgs.writeShellScriptBin "memory-edit" ''exec /etc/clawdinator/bin/memory-edit "$@"'')
+        (pkgs.writeShellScriptBin "clawdinator-gh-refresh" ''exec ${githubTokenScript}'')
       ];
 
     environment.etc."clawd/openclaw.json".source = configSource;
@@ -500,6 +510,7 @@ in
         - **memory-read** — shared-lock read from `/memory`.
         - **memory-write** — exclusive-lock write to `/memory`.
         - **memory-edit** — exclusive-lock in-place edit for `/memory`.
+        - **clawdinator-gh-refresh** — mint GitHub App token + refresh GH auth (no sudo).
       '';
     };
     environment.etc."stunnel/efs.conf" = lib.mkIf cfg.memoryEfs.enable {
@@ -559,6 +570,8 @@ in
       "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} - -"
       "d ${workspaceDir} 0750 ${cfg.user} ${cfg.group} - -"
       "d ${logDir} 0750 ${cfg.user} ${cfg.group} - -"
+      "d ${ghConfigDir} 0750 ${cfg.user} ${cfg.group} - -"
+      "d /run/clawd 0750 ${cfg.user} ${cfg.group} - -"
       "d ${cfg.memoryDir} 0750 ${cfg.user} ${cfg.group} - -"
       "d ${repoSeedBaseDir} 0750 ${cfg.user} ${cfg.group} - -"
       "d /usr/local/bin 0755 root root - -"
@@ -736,7 +749,8 @@ in
       wants = [ "network-online.target" ];
       serviceConfig = {
         Type = "oneshot";
-        User = "root";
+        User = cfg.user;
+        Group = cfg.group;
       };
       path = [ pkgs.openssl pkgs.curl pkgs.jq pkgs.coreutils pkgs.gh ];
       script = "${githubTokenScript}";

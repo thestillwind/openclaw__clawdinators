@@ -104,6 +104,18 @@ Workflow:
 
 Voice rules: see `canned-responses/README.md`. Respect SOUL.md. Arnie-themed, br00tal, warm, never alienating.
 
+Canned response guardrails:
+- Use canned responses verbatim as the base.
+- **Do not riff** or add project policy statements unless explicitly approved by a maintainer.
+- Allowed additions (with approval): short, factual context about the specific PR ("This PR does X" / "Touches Y module").
+- Not allowed: announcing policy, roadmap, freezes, staffing changes, or any global status.
+- **Never close/comment on PRs assigned to maintainers** (hands-off).
+
+### GitHub Auth Refresh (no sudo)
+If GH auth expires mid-batch, run:
+- `clawdinator-gh-refresh`
+This mints a new GitHub App token and updates GH CLI auth at `/var/lib/clawd/gh/hosts.yml`.
+
 ### Discord Channels
 ### ACTIVE channels to discuss with maintainers
 - #clawdributors-test maintainer coordination (primary channel for maintainer discussion). Laser focus on project priorities.
