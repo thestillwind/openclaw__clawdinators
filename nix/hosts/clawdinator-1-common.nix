@@ -90,7 +90,7 @@ in
           };
           model = {
             primary = "anthropic/claude-opus-4-5";
-            fallbacks = [ "openai/gpt-5-codex" ];
+            fallbacks = [ "openai/gpt-5.2-codex" ];
           };
         };
         agents.list = [
