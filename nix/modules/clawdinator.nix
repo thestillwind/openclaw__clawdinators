@@ -523,6 +523,10 @@ in
         - **clawdinator-gh-refresh** — mint GitHub App token + refresh GH auth (no sudo).
       '';
     };
+    environment.etc."clawdinator/pi-settings.json" = {
+      mode = "0644";
+      source = ../../clawdinator/pi-settings.json;
+    };
     environment.etc."stunnel/efs.conf" = lib.mkIf cfg.memoryEfs.enable {
       mode = "0644";
       text = ''
@@ -578,6 +582,9 @@ in
 
     systemd.tmpfiles.rules = [
       "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} - -"
+      "d ${cfg.stateDir}/.pi 0750 ${cfg.user} ${cfg.group} - -"
+      "d ${cfg.stateDir}/.pi/agent 0750 ${cfg.user} ${cfg.group} - -"
+      "L+ ${cfg.stateDir}/.pi/agent/settings.json - - - - /etc/clawdinator/pi-settings.json"
       "d ${workspaceDir} 0750 ${cfg.user} ${cfg.group} - -"
       "d ${logDir} 0750 ${cfg.user} ${cfg.group} - -"
       "d ${ghConfigDir} 0750 ${cfg.user} ${cfg.group} - -"

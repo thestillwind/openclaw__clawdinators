@@ -1,4 +1,7 @@
 { pkgs }:
+let
+  piCodingAgent = pkgs.callPackage ./pi-coding-agent.nix {};
+in
 {
   packages = [
     pkgs.bash
@@ -11,6 +14,7 @@
     pkgs.ripgrep
     pkgs.nodejs_22
     pkgs.pnpm_10
+    piCodingAgent
     pkgs.util-linux
     pkgs.nfs-utils
     pkgs.stunnel
@@ -22,6 +26,7 @@
     { name = "bash"; description = "Shell runtime for CLAWDINATOR scripts."; }
     { name = "gh"; description = "GitHub CLI for repo + PR inventory."; }
     { name = "openclaw-gateway"; description = "CLAWDINATOR runtime (Clawbot gateway)."; }
+    { name = "pi"; description = "Pi coding agent CLI."; }
     { name = "git"; description = "Repo sync + ops."; }
     { name = "curl"; description = "HTTP requests."; }
     { name = "jq"; description = "JSON processing."; }
