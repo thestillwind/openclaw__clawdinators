@@ -132,7 +132,7 @@ in
           slots.memory = "none";
           entries.discord.enabled = true;
         };
-        skills.allowBundled = [ "github" "clawdhub" ];
+        skills.allowBundled = [ "github" "clawdhub" "coding-agent" ];
         cron = {
           enabled = true;
           store = "/var/lib/clawd/cron-jobs.json";

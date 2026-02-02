@@ -45,7 +45,7 @@
           identity.name = "CLAWDINATOR-1";
         }
       ];
-      skills.allowBundled = [ "github" "clawdhub" ];
+      skills.allowBundled = [ "github" "clawdhub" "coding-agent" ];
       channels = {
         discord = {
           enabled = true;
