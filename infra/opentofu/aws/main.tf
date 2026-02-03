@@ -126,9 +126,7 @@ data "aws_iam_policy_document" "ami_importer" {
   statement {
     sid = "BucketRead"
     actions = [
-      "s3:GetBucket*",
-      "s3:GetEncryptionConfiguration",
-      "s3:GetAccelerateConfiguration"
+      "s3:Get*"
     ]
     resources = [aws_s3_bucket.image_bucket.arn]
   }
