@@ -178,7 +178,7 @@ in
             dm.enabled = false;
             guilds = {
               "1456350064065904867" = {
-                requireMention = false;
+                requireMention = true;
                 channels = {
                   # #clawdinators-test (mention-only)
                   "1458426982579830908" = {
