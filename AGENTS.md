@@ -118,6 +118,7 @@ End-to-end SDLC (local → AMI → host) **(verified)**:
 
 Important:
 - Repo/workspace on host is seeded from the **AMI snapshot**. `git pull` is ephemeral; rebuild AMI for persistent changes.
+- Any manual host fix is triage-only; always rebuild the AMI and redeploy before calling it done.
 - If SSH access is lost, use SSM (instance profile is attached via OpenTofu) to re-add `/root/.ssh/authorized_keys`.
 
 Key principle: mental notes don’t survive restarts — write it to a file.
