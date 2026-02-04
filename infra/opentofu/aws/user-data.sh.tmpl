@@ -22,6 +22,7 @@ wait_for_service() {
   local waited=0
   local state
   local result
+  local start_ts
 
   if [ "$#" -ge 2 ]; then
     timeout="$2"
@@ -31,11 +32,12 @@ wait_for_service() {
   while true; do
     state="$(systemctl show -p ActiveState --value "$service")"
     result="$(systemctl show -p Result --value "$service")"
+    start_ts="$(systemctl show -p ExecMainStartTimestampMonotonic --value "$service")"
 
     if [ "$state" = "active" ]; then
       return 0
     fi
-    if [ "$state" = "inactive" ] && [ "$result" = "success" ]; then
+    if [ "$state" = "inactive" ] && [ "$result" = "success" ] && [ "$start_ts" != "0" ]; then
       return 0
     fi
     if [ "$state" = "failed" ] || [ "$result" = "exit-code" ] || [ "$result" = "timeout" ] || [ "$result" = "failed" ]; then
