@@ -34,3 +34,6 @@ Update with incidents, fixes, and operational lessons.
 - AMI: ami-0ae43cb24200e1665 (user-data oneshot restart + wait loop).
 - Instance: clawdinator-2: i-00fe5c0c6372baaf3 (IP 54.93.75.82, DNS ec2-54-93-75-82.eu-central-1.compute.amazonaws.com).
 - Note: amazon-init completed; clawdinator active; transient hostname still clawdinator-1 (static clawdinator-2).
+- AMI: ami-004e1c2ade3e2b9e6 (used for babelfish deploy; bootstrap bundle updated).
+- Instance: clawdinator-babelfish: i-00b889d8ad5977eba (IP 3.76.43.198, DNS ec2-3-76-43-198.eu-central-1.compute.amazonaws.com).
+- Note: CLAWDINATOR-BABELFISH translation-only bot on t3.small; transient hostname still clawdinator-1 (static clawdinator-babelfish).
