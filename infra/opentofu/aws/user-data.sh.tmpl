@@ -16,8 +16,8 @@ fi
 systemctl stop clawdinator.service || true
 systemctl daemon-reload
 
-systemctl start clawdinator-bootstrap.service
-systemctl start clawdinator-repo-seed.service
+systemctl start --wait clawdinator-bootstrap.service
+systemctl start --wait clawdinator-repo-seed.service
 
 if [ ! -d /var/lib/clawd/repos/clawdinators ]; then
   echo "clawdinator repo missing after bootstrap" >&2
