@@ -13,5 +13,6 @@ Active IDs:
   - 1458426982579830908 (#clawdinators-test, mention-only)
   - 1458138963067011176 (#clawdributors-test, lurk-only; replies denied)
   - 1458141495701012561 (#clawdributors, lurk-only; replies denied)
-- BABELFISH channel:
+- BABELFISH channels:
   - 1467469670192910387 (#help-中文, translation-only; no mentions required)
+  - 1468983176620675132 (translation-only; no mentions required)
