@@ -188,6 +188,21 @@ data "aws_iam_policy_document" "ami_importer" {
     resources = ["*"]
   }
 
+  # Allow CI to do fast, declarative deploys via AWS Systems Manager (SSM)
+  # instead of slow AMI replacement.
+  statement {
+    sid = "FleetDeploySSM"
+    actions = [
+      "ssm:SendCommand",
+      "ssm:GetCommandInvocation",
+      "ssm:ListCommands",
+      "ssm:ListCommandInvocations",
+      "ssm:DescribeInstanceInformation",
+      "ssm:GetDocument"
+    ]
+    resources = ["*"]
+  }
+
   statement {
     sid = "TerraformLockTable"
     actions = [

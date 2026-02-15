@@ -1,0 +1,134 @@
+name: Release (bootstrap + fast deploy)
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - flake.nix
+      - flake.lock
+      - nix/**
+      - scripts/**
+      - clawdinator/**
+      - infra/opentofu/aws/**
+  workflow_dispatch:
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            extra-substituters = https://cache.garnix.io
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+
+      - name: Evaluate host configs (fail fast)
+        run: |
+          nix eval --raw .#nixosConfigurations.clawdinator-1.config.system.build.toplevel.drvPath --accept-flake-config >/dev/null
+          nix eval --raw .#nixosConfigurations.clawdinator-2.config.system.build.toplevel.drvPath --accept-flake-config >/dev/null
+
+  upload-bootstrap:
+    needs: eval
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_BUCKET }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            extra-substituters = https://cache.garnix.io
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+
+      - name: Install tooling
+        run: |
+          nix profile install \
+            nixpkgs#awscli2 \
+            nixpkgs#age \
+            nixpkgs#jq \
+            nixpkgs#zstd
+
+      - name: Write agenix image key
+        env:
+          CLAWDINATOR_AGE_KEY: ${{ secrets.CLAWDINATOR_AGE_KEY }}
+        run: |
+          mkdir -p nix/keys
+          printf '%s' "${CLAWDINATOR_AGE_KEY}" > nix/keys/clawdinator.agekey
+          chmod 600 nix/keys/clawdinator.agekey
+
+      - name: Fetch age secrets
+        run: |
+          mkdir -p nix/age-secrets
+          aws s3 sync "s3://${S3_BUCKET}/age-secrets" nix/age-secrets
+          bash scripts/validate-age-secrets.sh
+
+      - name: Mint GitHub App token
+        env:
+          GITHUB_APP_ID: "2607181"
+          GITHUB_APP_INSTALLATION_ID: "102951645"
+        run: |
+          age -d -i nix/keys/clawdinator.agekey \
+            -o /tmp/clawdinator-github-app.pem \
+            nix/age-secrets/clawdinator-github-app.pem.age
+          export GITHUB_APP_PEM_FILE=/tmp/clawdinator-github-app.pem
+          token="$(scripts/mint-github-app-token.sh)"
+          echo "GITHUB_TOKEN=${token}" >> "${GITHUB_ENV}"
+
+      - name: Prepare repo seeds
+        env:
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        run: |
+          scripts/prepare-repo-seeds.sh repo-seeds
+
+      - name: Upload bootstrap bundles
+        run: |
+          bash scripts/upload-bootstrap-all.sh
+
+  deploy:
+    needs: upload-bootstrap
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v27
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - name: Install tooling
+        run: |
+          nix profile install \
+            nixpkgs#awscli2 \
+            nixpkgs#jq
+
+      - name: Switch fleet via SSM (canary then full)
+        env:
+          REV: ${{ github.sha }}
+        run: |
+          bash scripts/fleet-switch-nixos.sh "${REV}"
