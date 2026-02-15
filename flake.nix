@@ -46,6 +46,7 @@
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
           agenix.nixosModules.default
+          nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-1.nix
         ];
       };
@@ -55,6 +56,7 @@
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
           agenix.nixosModules.default
+          nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-2.nix
         ];
       };
@@ -64,6 +66,7 @@
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
           agenix.nixosModules.default
+          nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-babelfish.nix
         ];
       };
@@ -73,6 +76,7 @@
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
           agenix.nixosModules.default
+          nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-1-image.nix
         ];
       };

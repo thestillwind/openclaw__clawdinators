@@ -11,11 +11,6 @@ let
     merge = _loc: defs: lib.foldl' lib.recursiveUpdate {} (map (d: d.value) defs);
   };
 
-  configSource =
-    if cfg.configFile != null
-    then cfg.configFile
-    else pkgs.writeText "openclaw.json" (builtins.toJSON cfg.config);
-
   updateScript = pkgs.writeShellScript "clawdinator-self-update" ''
     set -euo pipefail
 
@@ -556,7 +551,6 @@ in
         (pkgs.writeShellScriptBin "clawdinator-gh-refresh" ''exec ${githubTokenScript}'')
       ];
 
-    environment.etc."clawd/openclaw.json".source = configSource;
     environment.etc."clawd/cron-jobs.json" = lib.mkIf (cfg.cronJobsFile != null) {
       source = cfg.cronJobsFile;
       mode = "0644";
@@ -684,9 +678,52 @@ in
       };
     };
 
+    # Gateway service is implemented upstream in nix-openclaw.
+    services.openclaw-gateway = {
+      enable = true;
+      unitName = "clawdinator";
+      package = cfg.package;
+      port = cfg.gatewayPort;
+      user = cfg.user;
+      group = cfg.group;
+      createUser = false;
+      stateDir = cfg.stateDir;
+      workingDirectory = cfg.stateDir;
+      configPath = configPath;
+      config = cfg.config;
+      configFile = cfg.configFile;
+      logPath = "${logDir}/gateway.log";
+
+      # Additional env beyond OPENCLAW_* and CLAWDBOT_* defaults.
+      environment = {
+        CLAWDBOT_WORKSPACE_DIR = workspaceDir;
+        CLAWDBOT_LOG_DIR = logDir;
+        GH_CONFIG_DIR = ghConfigDir;
+
+        # Backward-compatible env names used by some builds.
+        CLAWDIS_CONFIG_PATH = configPath;
+        CLAWDIS_STATE_DIR = cfg.stateDir;
+      };
+
+      servicePath = [ pkgs.coreutils pkgs.git pkgs.rsync ] ++ toolchain.packages;
+
+      execStartPre =
+        lib.optionals (cfg.repoSeedSnapshotDir == null) [
+          "${pkgs.bash}/bin/bash ${../../scripts/seed-repos.sh} ${repoSeedsFile} ${repoSeedBaseDir}"
+        ]
+        ++ [
+          "${pkgs.bash}/bin/bash ${../../scripts/seed-workspace.sh} ${cfg.workspaceTemplateDir} ${workspaceDir}"
+        ];
+
+      execStart =
+        if tokenWrapper != null
+        then "${tokenWrapper}/bin/clawdinator-gateway"
+        else "${gatewayBin} gateway --port ${toString cfg.gatewayPort}";
+    };
+
+    # Add CLAWDINATOR-specific dependencies to the upstream gateway unit.
     systemd.services.clawdinator = {
       description = "CLAWDINATOR (Moltbot gateway)";
-      wantedBy = [ "multi-user.target" ];
       after =
         [ "network.target" ]
         ++ lib.optional cfg.bootstrap.enable "clawdinator-bootstrap.service"
@@ -700,40 +737,6 @@ in
         ++ lib.optional cfg.githubApp.enable "clawdinator-github-app-token.service"
         ++ lib.optional (cfg.repoSeedSnapshotDir != null) "clawdinator-repo-seed.service"
         ++ lib.optional (cfg.openaiApiKeyFile != null && cfg.anthropicApiKeyFile != null) "clawdinator-pi-auth.service";
-
-      environment = {
-        CLAWDBOT_CONFIG_PATH = configPath;
-        CLAWDBOT_STATE_DIR = cfg.stateDir;
-        CLAWDBOT_WORKSPACE_DIR = workspaceDir;
-        CLAWDBOT_LOG_DIR = logDir;
-        GH_CONFIG_DIR = ghConfigDir;
-
-        # Backward-compatible env names used by some builds.
-        CLAWDIS_CONFIG_PATH = configPath;
-        CLAWDIS_STATE_DIR = cfg.stateDir;
-      };
-
-      path = [ pkgs.coreutils pkgs.git pkgs.rsync ] ++ toolchain.packages;
-      serviceConfig = {
-        User = cfg.user;
-        Group = cfg.group;
-        WorkingDirectory = cfg.stateDir;
-        ExecStartPre =
-          lib.optionals (cfg.repoSeedSnapshotDir == null) [
-            "${pkgs.bash}/bin/bash ${../../scripts/seed-repos.sh} ${repoSeedsFile} ${repoSeedBaseDir}"
-          ]
-          ++ [
-            "${pkgs.bash}/bin/bash ${../../scripts/seed-workspace.sh} ${cfg.workspaceTemplateDir} ${workspaceDir}"
-          ];
-        ExecStart =
-          if tokenWrapper != null
-          then "${tokenWrapper}/bin/clawdinator-gateway"
-          else "${gatewayBin} gateway --port ${toString cfg.gatewayPort}";
-        Restart = "always";
-        RestartSec = 2;
-        StandardOutput = "append:${logDir}/gateway.log";
-        StandardError = "append:${logDir}/gateway.log";
-      };
     };
 
     systemd.services.clawdinator-repo-seed = lib.mkIf (cfg.repoSeedSnapshotDir != null) {
