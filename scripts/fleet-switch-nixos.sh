@@ -24,6 +24,6 @@ for host in "${hosts[@]}"; do
   # Run everything under bash -lc so PATH + profiles behave similarly to an interactive session.
   # We also force flakes enabled for safety.
   bash scripts/aws-ssm-run.sh "${instance_id}" \
-    "bash -lc 'set -euo pipefail; export NIX_CONFIG=\"experimental-features = nix-command flakes\"; nixos-rebuild switch --accept-flake-config --flake github:openclaw/clawdinators/${rev}#${host}; systemctl is-active clawdinator'"
+    "bash -lc 'set -euo pipefail; export NIX_CONFIG=\"experimental-features = nix-command flakes\"; nixos-rebuild switch --accept-flake-config --flake github:openclaw/clawdinators/${rev}#${host}; systemctl is-active clawdinator; test \"$(cat /run/current-system/configurationRevision || true)\" = \"${rev}\"'"
 
 done

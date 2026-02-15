@@ -13,6 +13,11 @@
       systems = [ "x86_64-linux" "aarch64-linux" ];
       forAllSystems = f: lib.genAttrs systems (system: f system);
       clawbotOverlay = nix-openclaw.overlays.default;
+
+      revisionModule = { ... }: {
+        system.configurationRevision =
+          if self ? rev then self.rev else (self.dirtyRev or null);
+      };
     in
     {
       nixosModules.clawdinator = import ./nix/modules/clawdinator.nix;
@@ -45,6 +50,7 @@
         system = "x86_64-linux";
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
+          revisionModule
           agenix.nixosModules.default
           nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-1.nix
@@ -55,6 +61,7 @@
         system = "x86_64-linux";
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
+          revisionModule
           agenix.nixosModules.default
           nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-2.nix
@@ -65,6 +72,7 @@
         system = "x86_64-linux";
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
+          revisionModule
           agenix.nixosModules.default
           nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-babelfish.nix
@@ -75,6 +83,7 @@
         system = "x86_64-linux";
         modules = [
           ({ ... }: { nixpkgs.overlays = [ self.overlays.default ]; })
+          revisionModule
           agenix.nixosModules.default
           nix-openclaw.nixosModules.openclaw-gateway
           ./nix/hosts/clawdinator-1-image.nix
