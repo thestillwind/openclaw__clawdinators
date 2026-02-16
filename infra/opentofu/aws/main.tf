@@ -241,10 +241,16 @@ data "aws_iam_policy_document" "ami_importer" {
   }
 }
 
-resource "aws_iam_user_policy" "ami_importer" {
+# Use a managed policy (not an inline user policy) to avoid the 2048 byte inline policy limit.
+resource "aws_iam_policy" "ami_importer" {
   name   = "clawdinator-ami-importer"
-  user   = aws_iam_user.ci_user.name
   policy = data.aws_iam_policy_document.ami_importer.json
+  tags   = local.tags
+}
+
+resource "aws_iam_user_policy_attachment" "ami_importer" {
+  user       = aws_iam_user.ci_user.name
+  policy_arn = aws_iam_policy.ami_importer.arn
 }
 
 data "aws_iam_policy_document" "instance_assume" {
