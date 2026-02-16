@@ -18,7 +18,7 @@ echo "CLAWDINATOR Fleet"
 echo "Name | InstanceId | State | AMI | Public IP"
 
 echo "${instances_json}" | jq -r '.[] | {
-  name: (.Tags[]? | select(.Key=="Name").Value) // "unknown",
+  name: ((.Tags[]? | select(.Key=="Name").Value) // "unknown"),
   id: .InstanceId,
   state: .State.Name,
   ami: .ImageId,
