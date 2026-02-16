@@ -27,9 +27,9 @@ jobs:
       TF_BACKEND_KEY: state/clawdinators.tfstate
       TF_BACKEND_REGION: ${{ secrets.AWS_REGION }}
       TF_BACKEND_DYNAMO_TABLE: clawdinator-terraform-locks
-      TF_VAR_control_api_enabled: true
-      TF_VAR_control_api_token: ${{ secrets.CONTROL_API_TOKEN }}
-      TF_VAR_github_token: ${{ secrets.CLAWDINATOR_WORKFLOW_TOKEN }}
+      # Control API is optional and requires broader IAM privileges than the CI user has.
+      # Keep disabled for fleet AMI redeploys.
+      TF_VAR_control_api_enabled: false
     steps:
       - name: Checkout
         uses: actions/checkout@v4
