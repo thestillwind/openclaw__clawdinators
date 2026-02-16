@@ -134,6 +134,19 @@ data "aws_iam_policy_document" "ami_importer" {
     resources = [aws_s3_bucket.image_bucket.arn]
   }
 
+  # Needed so CI can manage the public PR-intent bucket (read/update bucket policy,
+  # public access block, versioning, encryption, etc.) during tofu apply.
+  statement {
+    sid = "PrIntentBucketManage"
+    actions = [
+      "s3:GetBucket*",
+      "s3:PutBucket*",
+      "s3:DeleteBucketPolicy",
+      "s3:ListBucket"
+    ]
+    resources = [aws_s3_bucket.pr_intent_public.arn]
+  }
+
   statement {
     sid = "ObjectReadWrite"
     actions = [
